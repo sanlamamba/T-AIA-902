@@ -69,7 +69,7 @@ class DQNAgent(BaseAgent):
 
             error = target - current_q[action]
             self.training_errors.append(abs(error))
-            current_q[action] += self.alpha * error
+            self._backpropagate(state_one_hot, h1, h2, action, error)
 
         if self.epsilon > self.epsilon_min:
             self.epsilon *= self.epsilon_decay
