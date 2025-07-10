@@ -137,6 +137,10 @@ def evaluate_agent(env, agent, n_episodes, algorithm_name, render=False):
         "mean_steps": np.mean(test_steps),
         "std_steps": np.std(test_steps),
         "win_rate": wins / n_episodes,
-        "mean_success_steps": np.mean(step_efficiency) if step_efficiency else float("inf"),
-        "efficiency_score": wins / np.mean(test_steps) if np.mean(test_steps) > 0 else 0,
+        "mean_success_steps": (
+            np.mean(step_efficiency) if step_efficiency else float("inf")
+        ),
+        "efficiency_score": (
+            wins / np.mean(test_steps) if np.mean(test_steps) > 0 else 0
+        ),
     }

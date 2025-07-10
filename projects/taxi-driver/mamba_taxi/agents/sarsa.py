@@ -3,7 +3,16 @@ from .base import BaseAgent
 
 
 class SARSAAgent(BaseAgent):
-    def __init__(self, n_actions, n_states, alpha=0.1, gamma=0.99, epsilon=0.1, epsilon_decay=0.995, epsilon_min=0.01):
+    def __init__(
+        self,
+        n_actions,
+        n_states,
+        alpha=0.1,
+        gamma=0.99,
+        epsilon=0.1,
+        epsilon_decay=0.995,
+        epsilon_min=0.01,
+    ):
         super().__init__(n_actions, n_states)
         self.alpha = alpha
         self.gamma = gamma
@@ -26,7 +35,7 @@ class SARSAAgent(BaseAgent):
         error = target - self.q_table[state, action]
         self.q_table[state, action] += self.alpha * error
         self.training_errors.append(abs(error))
-        
+
         # Decay epsilon
         if self.epsilon > self.epsilon_min:
             self.epsilon = max(self.epsilon_min, self.epsilon * self.epsilon_decay)

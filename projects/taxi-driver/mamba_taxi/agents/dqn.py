@@ -57,25 +57,25 @@ class DQNAgent(BaseAgent):
         # Output layer gradients
         dz4 = np.zeros_like(self.z4)
         dz4[action] = error
-        
+
         dw4 = np.outer(self.a3, dz4)
         db4 = dz4
-        
+
         # Hidden layer 3 gradients
         dz3 = np.dot(dz4, self.weights4.T) * self._relu_derivative(self.z3)
         dw3 = np.outer(self.a2, dz3)
         db3 = dz3
-        
+
         # Hidden layer 2 gradients
         dz2 = np.dot(dz3, self.weights3.T) * self._relu_derivative(self.z2)
         dw2 = np.outer(self.a1, dz2)
         db2 = dz2
-        
+
         # Hidden layer 1 gradients
         dz1 = np.dot(dz2, self.weights2.T) * self._relu_derivative(self.z1)
         dw1 = np.outer(state, dz1)
         db1 = dz1
-        
+
         # Update weights and biases
         self.weights4 += self.alpha * dw4
         self.bias4 += self.alpha * db4
