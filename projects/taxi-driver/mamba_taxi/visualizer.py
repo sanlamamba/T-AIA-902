@@ -4,7 +4,6 @@ import numpy as np
 from scipy import stats
 import seaborn as sns
 from matplotlib.patches import Rectangle
-import matplotlib.patches as mpatches
 
 # Set style for beautiful plots
 plt.style.use("seaborn-v0_8")
