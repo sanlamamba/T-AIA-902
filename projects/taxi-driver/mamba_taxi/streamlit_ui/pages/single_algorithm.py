@@ -1,7 +1,3 @@
-"""
-Single Algorithm Testing Page
-"""
-
 import streamlit as st
 import time
 
@@ -12,27 +8,24 @@ from ..utils.agent_factory import AgentFactory
 
 
 def render_single_algorithm_page():
-    """Render the single algorithm testing page"""
-    st.header("Single Algorithm Testing")
+    st.header("Test d'Algorithme Unique")
 
     col1, col2 = st.columns([1, 2])
 
     with col1:
         st.subheader("Configuration")
 
-        # Algorithm selection
-        algorithm = st.selectbox("Choose Algorithm", ALGORITHMS)
+        algorithm = st.selectbox("Choisir un Algorithme", ALGORITHMS)
 
-        # Training parameters
-        st.subheader("Training Parameters")
+        st.subheader("Paramètres d'Entraînement")
         train_episodes = st.number_input(
-            "Training Episodes",
+            "Épisodes d'Entraînement",
             min_value=DEFAULT_PARAMS["train_episodes"]["min"],
             max_value=DEFAULT_PARAMS["train_episodes"]["max"],
             value=DEFAULT_PARAMS["train_episodes"]["default"],
         )
         test_episodes = st.number_input(
-            "Test Episodes",
+            "Épisodes de Test",
             min_value=DEFAULT_PARAMS["test_episodes"]["min"],
             max_value=DEFAULT_PARAMS["test_episodes"]["max"],
             value=DEFAULT_PARAMS["test_episodes"]["default"],
@@ -41,10 +34,10 @@ def render_single_algorithm_page():
         # Algorithm-specific parameters
         params = {}
         if algorithm != "BruteForce":
-            st.subheader("Algorithm Parameters")
+            st.subheader("Paramètres d'Algorithme")
 
             params["alpha"] = st.slider(
-                "Learning Rate (α)",
+                "Taux d'Apprentissage (α)",
                 min_value=DEFAULT_PARAMS["alpha"]["min"],
                 max_value=DEFAULT_PARAMS["alpha"]["max"],
                 value=DEFAULT_PARAMS["alpha"]["default"],
@@ -52,7 +45,7 @@ def render_single_algorithm_page():
             )
 
             params["gamma"] = st.slider(
-                "Discount Factor (γ)",
+                "Facteur d'Actualisation (γ)",
                 min_value=DEFAULT_PARAMS["gamma"]["min"],
                 max_value=DEFAULT_PARAMS["gamma"]["max"],
                 value=DEFAULT_PARAMS["gamma"]["default"],
@@ -60,7 +53,7 @@ def render_single_algorithm_page():
             )
 
             params["epsilon"] = st.slider(
-                "Initial Exploration (ε)",
+                "Exploration Initiale (ε)",
                 min_value=DEFAULT_PARAMS["epsilon"]["min"],
                 max_value=DEFAULT_PARAMS["epsilon"]["max"],
                 value=DEFAULT_PARAMS["epsilon"]["default"],
@@ -68,7 +61,7 @@ def render_single_algorithm_page():
             )
 
             params["epsilon_decay"] = st.slider(
-                "Exploration Decay",
+                "Décroissance d'Exploration",
                 min_value=DEFAULT_PARAMS["epsilon_decay"]["min"],
                 max_value=DEFAULT_PARAMS["epsilon_decay"]["max"],
                 value=DEFAULT_PARAMS["epsilon_decay"]["default"],
@@ -76,7 +69,7 @@ def render_single_algorithm_page():
             )
 
             params["epsilon_min"] = st.slider(
-                "Min Exploration",
+                "Exploration Minimale",
                 min_value=DEFAULT_PARAMS["epsilon_min"]["min"],
                 max_value=DEFAULT_PARAMS["epsilon_min"]["max"],
                 value=DEFAULT_PARAMS["epsilon_min"]["default"],
@@ -85,13 +78,13 @@ def render_single_algorithm_page():
 
             if algorithm == "DQN":
                 params["memory_size"] = st.number_input(
-                    "Memory Size",
+                    "Taille de Mémoire",
                     min_value=DEFAULT_PARAMS["memory_size"]["min"],
                     max_value=DEFAULT_PARAMS["memory_size"]["max"],
                     value=DEFAULT_PARAMS["memory_size"]["default"],
                 )
                 params["batch_size"] = st.number_input(
-                    "Batch Size",
+                    "Taille de Lot",
                     min_value=DEFAULT_PARAMS["batch_size"]["min"],
                     max_value=DEFAULT_PARAMS["batch_size"]["max"],
                     value=DEFAULT_PARAMS["batch_size"]["default"],
@@ -100,15 +93,19 @@ def render_single_algorithm_page():
         # Validation
         if algorithm != "BruteForce":
             if not AgentFactory.validate_params(algorithm, params):
-                st.error("Invalid parameters! Please check your input values.")
+                st.error(
+                    "Paramètres invalides ! Veuillez vérifier vos valeurs d'entrée."
+                )
                 return
 
         # Run button
-        run_experiment = st.button("🚀 Run Training & Evaluation", type="primary")
+        run_experiment = st.button(
+            "🚀 Lancer l'Entraînement et l'Évaluation", type="primary"
+        )
 
     with col2:
         if run_experiment:
-            st.subheader("Training Progress")
+            st.subheader("Progression de l'Entraînement")
 
             # Create progress indicators
             progress_bar = st.progress(0)
@@ -120,9 +117,9 @@ def render_single_algorithm_page():
 
                 # Training phase
                 if algorithm != "BruteForce":
-                    status_text.text("🏋️ Training in progress...")
+                    status_text.text("🏋️ Entraînement en cours...")
                 else:
-                    status_text.text("🎲 Evaluating random baseline...")
+                    status_text.text("🎲 Évaluation de la référence aléatoire...")
 
                 progress_bar.progress(0.1)
 
@@ -135,7 +132,7 @@ def render_single_algorithm_page():
                 progress_bar.progress(0.7)
                 training_time = time.time() - start_time
 
-                status_text.text("🔍 Evaluating performance...")
+                status_text.text("🔍 Évaluation des performances...")
                 progress_bar.progress(0.9)
 
                 # Store results
@@ -147,30 +144,30 @@ def render_single_algorithm_page():
                     st.session_state.training_history.append({algorithm: train_result})
 
                 progress_bar.progress(1.0)
-                status_text.text("🎉 Evaluation completed!")
+                status_text.text("🎉 Évaluation terminée !")
 
                 # Display results
-                st.subheader("Results")
+                st.subheader("Résultats")
                 VisualizationComponents.display_metrics(test_result)
 
                 # Performance summary
-                st.subheader("Performance Summary")
+                st.subheader("Résumé des Performances")
                 col_summary1, col_summary2 = st.columns(2)
 
                 with col_summary1:
-                    st.metric("Training Time", f"{training_time:.2f}s")
-                    st.metric("Mean Reward", f"{test_result['mean_reward']:.2f}")
+                    st.metric("Temps d'Entraînement", f"{training_time:.2f}s")
+                    st.metric("Récompense Moyenne", f"{test_result['mean_reward']:.2f}")
 
                 with col_summary2:
-                    st.metric("Win Rate", f"{test_result['win_rate']:.1%}")
+                    st.metric("Taux de Réussite", f"{test_result['win_rate']:.1%}")
                     st.metric(
-                        "Efficiency Score",
+                        "Score d'Efficacité",
                         f"{test_result.get('efficiency_score', 0):.4f}",
                     )
 
                 # Training progress chart
                 if algorithm != "BruteForce" and train_result.get("rewards"):
-                    st.subheader("Training Progress")
+                    st.subheader("Progression de l'Entraînement")
                     training_fig = (
                         VisualizationComponents.create_training_progress_chart(
                             {algorithm: train_result}
@@ -181,28 +178,30 @@ def render_single_algorithm_page():
 
                 # Success message
                 VisualizationComponents.display_success_message(
-                    f"✅ Successfully trained and evaluated {algorithm}!"
+                    f"✅ {algorithm} entraîné et évalué avec succès !"
                 )
 
             except Exception as e:
                 progress_bar.progress(0)
-                status_text.text("❌ Error occurred!")
-                VisualizationComponents.display_error_message(f"Error: {str(e)}")
-                st.error(f"An error occurred: {e}")
+                status_text.text("❌ Erreur survenue !")
+                VisualizationComponents.display_error_message(f"Erreur : {str(e)}")
+                st.error(f"Une erreur s'est produite : {e}")
 
         elif not st.session_state.results_history:
-            st.info("👆 Configure and run an algorithm to see results here!")
+            st.info(
+                "👆 Configurez et lancez un algorithme pour voir les résultats ici !"
+            )
         else:
-            st.subheader("Recent Results")
+            st.subheader("Résultats Récents")
             # Show last result if available
             if st.session_state.results_history:
                 last_result = st.session_state.results_history[-1]
                 VisualizationComponents.display_metrics(last_result)
 
                 # Quick action buttons
-                if st.button("🔄 Run Again with Same Settings"):
+                if st.button("🔄 Relancer avec les Mêmes Paramètres"):
                     st.experimental_rerun()
 
-                if st.button("📊 Compare with Other Algorithms"):
-                    st.session_state.current_page = "📊 Algorithm Comparison"
+                if st.button("📊 Comparer avec d'Autres Algorithmes"):
+                    st.session_state.current_page = "📊 Comparaison d'Algorithmes"
                     st.experimental_rerun()

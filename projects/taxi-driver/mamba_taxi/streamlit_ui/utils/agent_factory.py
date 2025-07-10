@@ -1,11 +1,6 @@
-"""
-Agent Factory for creating RL agents
-"""
-
 import sys
 import os
 
-# Add the parent directory to the path to import agents
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(parent_dir)
 
@@ -13,22 +8,9 @@ from agents import BruteForceAgent, QLearningAgent, SARSAAgent, DQNAgent
 
 
 class AgentFactory:
-    """Factory class for creating different RL agents"""
 
     @staticmethod
     def create_agent(algorithm, n_actions, n_states, **params):
-        """
-        Create agent based on algorithm and parameters
-
-        Args:
-            algorithm: Name of the algorithm
-            n_actions: Number of actions in the environment
-            n_states: Number of states in the environment
-            **params: Additional parameters for the agent
-
-        Returns:
-            Agent instance
-        """
         if algorithm == "BruteForce":
             return BruteForceAgent(n_actions, n_states)
         elif algorithm == "Q-Learning":
@@ -68,7 +50,6 @@ class AgentFactory:
 
     @staticmethod
     def validate_params(algorithm, params):
-        """Validate parameters for an algorithm"""
         if algorithm == "BruteForce":
             return True
 
@@ -81,7 +62,6 @@ class AgentFactory:
             if param not in params:
                 return False
 
-        # Validate ranges
         if not (0 < params["alpha"] <= 1):
             return False
         if not (0 < params["gamma"] < 1):

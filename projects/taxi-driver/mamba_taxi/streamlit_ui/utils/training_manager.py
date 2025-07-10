@@ -1,14 +1,9 @@
-"""
-Training and Evaluation Manager
-"""
-
 import sys
 import os
 import time
 import streamlit as st
 from typing import Dict, List, Any
 
-# Add the parent directory to the path to import trainer
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(parent_dir)
 
@@ -17,7 +12,6 @@ from .agent_factory import AgentFactory
 
 
 class TrainingManager:
-    """Manages training and evaluation of RL agents"""
 
     def __init__(self, env):
         self.env = env
@@ -26,18 +20,6 @@ class TrainingManager:
     def train_single_agent(
         self, algorithm: str, params: Dict, train_episodes: int, test_episodes: int
     ) -> Dict:
-        """
-        Train and evaluate a single agent
-
-        Args:
-            algorithm: Algorithm name
-            params: Algorithm parameters
-            train_episodes: Number of training episodes
-            test_episodes: Number of test episodes
-
-        Returns:
-            Dictionary containing training and evaluation results
-        """
         # Create agent
         env_info = st.session_state
         agent = self.agent_factory.create_agent(
@@ -155,7 +137,7 @@ class TrainingManager:
                     best_config["score"] = current_score
 
             except Exception as e:
-                st.warning(f"Configuration {i} failed: {e}")
+                st.warning(f"Configuration {i} échouée : {e}")
                 continue
 
         return {

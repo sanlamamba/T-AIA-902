@@ -1,7 +1,3 @@
-"""
-Visualization Components for the Streamlit App
-"""
-
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -13,19 +9,17 @@ import seaborn as sns
 
 
 class VisualizationComponents:
-    """Contains all visualization components for the Streamlit app"""
 
     @staticmethod
     def display_metrics(result):
-        """Display performance metrics in a formatted way"""
         st.markdown(
             f"""
         <div class="metric-card">
             <h4>{result['algorithm']}</h4>
-            <p><strong>Mean Reward:</strong> {result['mean_reward']:.2f} ± {result.get('std_reward', 0):.2f}</p>
-            <p><strong>Mean Steps:</strong> {result['mean_steps']:.1f} ± {result.get('std_steps', 0):.1f}</p>
-            <p><strong>Win Rate:</strong> {result['win_rate']:.2%}</p>
-            <p><strong>Efficiency Score:</strong> {result.get('efficiency_score', 0):.4f}</p>
+            <p><strong>Récompense Moyenne :</strong> {result['mean_reward']:.2f} ± {result.get('std_reward', 0):.2f}</p>
+            <p><strong>Étapes Moyennes :</strong> {result['mean_steps']:.1f} ± {result.get('std_steps', 0):.1f}</p>
+            <p><strong>Taux de Réussite :</strong> {result['win_rate']:.2%}</p>
+            <p><strong>Score d'Efficacité :</strong> {result.get('efficiency_score', 0):.4f}</p>
         </div>
         """,
             unsafe_allow_html=True,
@@ -33,16 +27,15 @@ class VisualizationComponents:
 
     @staticmethod
     def display_metrics_in_column(result, col):
-        """Display performance metrics in a specific column"""
         with col:
             st.markdown(
                 f"""
             <div class="metric-card">
                 <h4>{result['algorithm']}</h4>
-                <p><strong>Mean Reward:</strong> {result['mean_reward']:.2f} ± {result.get('std_reward', 0):.2f}</p>
-                <p><strong>Mean Steps:</strong> {result['mean_steps']:.1f} ± {result.get('std_steps', 0):.1f}</p>
-                <p><strong>Win Rate:</strong> {result['win_rate']:.2%}</p>
-                <p><strong>Efficiency Score:</strong> {result.get('efficiency_score', 0):.4f}</p>
+                <p><strong>Récompense Moyenne :</strong> {result['mean_reward']:.2f} ± {result.get('std_reward', 0):.2f}</p>
+                <p><strong>Étapes Moyennes :</strong> {result['mean_steps']:.1f} ± {result.get('std_steps', 0):.1f}</p>
+                <p><strong>Taux de Réussite :</strong> {result['win_rate']:.2%}</p>
+                <p><strong>Score d'Efficacité :</strong> {result.get('efficiency_score', 0):.4f}</p>
             </div>
             """,
                 unsafe_allow_html=True,
@@ -50,7 +43,6 @@ class VisualizationComponents:
 
     @staticmethod
     def create_comparison_chart(results):
-        """Create interactive comparison charts"""
         if not results:
             return None
 
@@ -61,10 +53,10 @@ class VisualizationComponents:
             rows=2,
             cols=2,
             subplot_titles=(
-                "Mean Reward Comparison",
-                "Win Rate Comparison",
-                "Efficiency Score Comparison",
-                "Mean Steps Comparison",
+                "Comparaison Récompense Moyenne",
+                "Comparaison Taux de Réussite",
+                "Comparaison Score d'Efficacité",
+                "Comparaison Étapes Moyennes",
             ),
             specs=[
                 [{"secondary_y": False}, {"secondary_y": False}],
@@ -80,7 +72,7 @@ class VisualizationComponents:
             go.Bar(
                 x=algorithms,
                 y=df["mean_reward"],
-                name="Mean Reward",
+                name="Récompense Moyenne",
                 marker_color=colors,
                 showlegend=False,
             ),
@@ -93,7 +85,7 @@ class VisualizationComponents:
             go.Bar(
                 x=algorithms,
                 y=df["win_rate"],
-                name="Win Rate",
+                name="Taux de Réussite",
                 marker_color=colors,
                 showlegend=False,
             ),
@@ -106,7 +98,7 @@ class VisualizationComponents:
             go.Bar(
                 x=algorithms,
                 y=df.get("efficiency_score", [0] * len(df)),
-                name="Efficiency",
+                name="Score d'Efficacité",
                 marker_color=colors,
                 showlegend=False,
             ),
@@ -119,7 +111,7 @@ class VisualizationComponents:
             go.Bar(
                 x=algorithms,
                 y=df["mean_steps"],
-                name="Mean Steps",
+                name="Étapes Moyennes",
                 marker_color=colors,
                 showlegend=False,
             ),
@@ -127,12 +119,13 @@ class VisualizationComponents:
             col=2,
         )
 
-        fig.update_layout(height=600, title_text="Algorithm Performance Comparison")
+        fig.update_layout(
+            height=600, title_text="Comparaison des Performances d'Algorithmes"
+        )
         return fig
 
     @staticmethod
     def create_training_progress_chart(training_data):
-        """Create training progress visualization"""
         if not training_data:
             return None
 
@@ -141,7 +134,6 @@ class VisualizationComponents:
         for algo, data in training_data.items():
             if "rewards" in data:
                 episodes = list(range(len(data["rewards"])))
-                # Smooth the data
                 window = min(50, len(data["rewards"]) // 10)
                 if window > 1:
                     smoothed = np.convolve(
@@ -157,7 +149,7 @@ class VisualizationComponents:
                         x=episodes_smooth,
                         y=smoothed,
                         mode="lines",
-                        name=f"{algo} (smoothed)",
+                        name=f"{algo} (lissé)",
                         line=dict(width=2),
                     )
                 )
@@ -168,30 +160,27 @@ class VisualizationComponents:
                         x=episodes,
                         y=data["rewards"],
                         mode="lines",
-                        name=f"{algo} (raw)",
+                        name=f"{algo} (brut)",
                         line=dict(width=1),
                         opacity=0.3,
                     )
                 )
 
         fig.update_layout(
-            title="Training Progress Over Episodes",
-            xaxis_title="Episode",
-            yaxis_title="Reward",
+            title="Progression de l'Entraînement par Épisodes",
+            xaxis_title="Épisode",
+            yaxis_title="Récompense",
             height=500,
         )
         return fig
 
     @staticmethod
     def create_radar_chart(results):
-        """Create radar chart for multi-dimensional comparison"""
         if not results:
             return None
 
-        # Normalize metrics to 0-1 scale
         df = pd.DataFrame(results)
 
-        # Normalize mean_reward and efficiency_score
         if "mean_reward" in df.columns:
             min_reward = df["mean_reward"].min()
             max_reward = df["mean_reward"].max()
@@ -220,7 +209,12 @@ class VisualizationComponents:
                         row.get("efficiency_score_norm", 0),
                         row.get("mean_reward_norm", 0),
                     ],  # Close the shape
-                    theta=["Reward", "Win Rate", "Efficiency", "Reward"],
+                    theta=[
+                        "Récompense",
+                        "Taux de Réussite",
+                        "Efficacité",
+                        "Récompense",
+                    ],
                     fill="toself",
                     name=row["algorithm"],
                     opacity=0.7,
@@ -229,14 +223,13 @@ class VisualizationComponents:
 
         fig.update_layout(
             polar=dict(radialaxis=dict(visible=True, range=[0, 1])),
-            title="Multi-Dimensional Performance Comparison",
+            title="Comparaison de Performance Multi-Dimensionnelle",
             height=500,
         )
         return fig
 
     @staticmethod
     def create_parameter_correlation_heatmap(results_df):
-        """Create parameter correlation heatmap"""
         correlation_params = [
             "alpha",
             "gamma",
@@ -257,7 +250,6 @@ class VisualizationComponents:
 
     @staticmethod
     def create_parameter_space_plot(results_df):
-        """Create parameter space exploration plot"""
         if "alpha" not in results_df.columns or "gamma" not in results_df.columns:
             return None
 
@@ -267,7 +259,7 @@ class VisualizationComponents:
             y="gamma",
             color="efficiency_score",
             size="win_rate",
-            title="Parameter Space Exploration",
+            title="Exploration de l'Espace des Paramètres",
             color_continuous_scale="viridis",
         )
         return fig

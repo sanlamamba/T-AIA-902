@@ -1,15 +1,8 @@
-"""
-Main Streamlit Application
-Modular Taxi Driver RL Interface
-"""
-
 import streamlit as st
 
-# Import configuration and setup
 from streamlit_ui.config import setup_page_config, load_custom_css, APP_TITLE, PAGES
 from streamlit_ui.session_manager import SessionStateManager
 
-# Import page components
 from streamlit_ui.pages.home import render_home_page
 from streamlit_ui.pages.single_algorithm import render_single_algorithm_page
 from streamlit_ui.pages.algorithm_comparison import render_algorithm_comparison_page
@@ -21,7 +14,6 @@ from streamlit_ui.pages.results_management import render_results_management_page
 
 
 def main():
-    """Main application entry point"""
     # Setup page configuration
     setup_page_config()
     load_custom_css()
@@ -34,76 +26,72 @@ def main():
 
     # Sidebar navigation
     st.sidebar.title("Navigation")
-    page = st.sidebar.selectbox("Choose a page", PAGES)
+    page = st.sidebar.selectbox("Choisir une page", PAGES)
 
-    # Update current page in session state
     st.session_state.current_page = page
 
-    # Sidebar info
     with st.sidebar:
         st.markdown("---")
-        st.subheader("Quick Stats")
+        st.subheader("Statistiques Rapides")
 
         if st.session_state.results_history:
-            st.metric("Total Experiments", len(st.session_state.results_history))
+            st.metric("Expériences Totales", len(st.session_state.results_history))
 
             import pandas as pd
 
             df = pd.DataFrame(st.session_state.results_history)
             unique_algos = df["algorithm"].nunique()
-            st.metric("Algorithms Tested", unique_algos)
+            st.metric("Algorithmes Testés", unique_algos)
 
             if "efficiency_score" in df.columns:
                 best_algo = df.loc[df["efficiency_score"].idxmax(), "algorithm"]
-                st.metric("Best Algorithm", best_algo)
+                st.metric("Meilleur Algorithme", best_algo)
         else:
-            st.info("No experiments yet")
+            st.info("Aucune expérience pour le moment")
 
         st.markdown("---")
         st.markdown(
             """
         <small>
-        💡 **Tips:**
-        - Start with Single Algorithm Testing
-        - Compare multiple algorithms
-        - Optimize hyperparameters
-        - Analyze results statistically
+        💡 **Conseils :**
+        - Commencez par le Test d'Algorithme Unique
+        - Comparez plusieurs algorithmes
+        - Optimisez les hyperparamètres
+        - Analysez les résultats statistiquement
         </small>
         """,
             unsafe_allow_html=True,
         )
 
-    # Route to appropriate page
     try:
-        if page == "🏠 Home":
+        if page == "🏠 Accueil":
             render_home_page()
-        elif page == "🔧 Single Algorithm Testing":
+        elif page == "🔧 Test d'Algorithme Unique":
             render_single_algorithm_page()
-        elif page == "📊 Algorithm Comparison":
+        elif page == "📊 Comparaison d'Algorithmes":
             render_algorithm_comparison_page()
-        elif page == "🎯 Hyperparameter Optimization":
+        elif page == "🎯 Optimisation d'Hyperparamètres":
             render_hyperparameter_optimization_page()
-        elif page == "📈 Advanced Analysis":
+        elif page == "📈 Analyse Avancée":
             render_advanced_analysis_page()
-        elif page == "💾 Results Management":
+        elif page == "💾 Gestion des Résultats":
             render_results_management_page()
         else:
-            st.error(f"Unknown page: {page}")
+            st.error(f"Page inconnue : {page}")
 
     except Exception as e:
-        st.error(f"An error occurred while rendering the page: {str(e)}")
+        st.error(f"Une erreur s'est produite lors du rendu de la page : {str(e)}")
         st.exception(e)
 
-        # Provide recovery options
-        st.subheader("Recovery Options")
-        if st.button("🔄 Reset Session"):
+        st.subheader("Options de Récupération")
+        if st.button("🔄 Réinitialiser la Session"):
             for key in list(st.session_state.keys()):
                 if key not in ["env", "n_actions", "n_states"]:
                     del st.session_state[key]
             st.experimental_rerun()
 
-        if st.button("🏠 Go to Home"):
-            st.session_state.current_page = "🏠 Home"
+        if st.button("🏠 Aller à l'Accueil"):
+            st.session_state.current_page = "🏠 Accueil"
             st.experimental_rerun()
 
 

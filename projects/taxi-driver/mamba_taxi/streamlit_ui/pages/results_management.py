@@ -1,25 +1,21 @@
-"""
-Results Management Page
-"""
-
 import streamlit as st
 import pandas as pd
 import json
 from datetime import datetime
+import os
 
 from ..components.visualizations import VisualizationComponents
 from ..utils.data_manager import DataManager
 
 
 def render_results_management_page():
-    """Render the results management page"""
-    st.header("Results Management")
+    st.header("Gestion des Résultats")
 
     data_manager = DataManager()
 
     # Results history section
     if st.session_state.results_history:
-        st.subheader("Results History")
+        st.subheader("Historique des Résultats")
 
         # Create summary table
         history_df = pd.DataFrame(st.session_state.results_history)
@@ -32,33 +28,33 @@ def render_results_management_page():
         col1, col2, col3, col4 = st.columns(4)
 
         with col1:
-            st.metric("Total Experiments", len(st.session_state.results_history))
+            st.metric("Expériences Totales", len(st.session_state.results_history))
 
         with col2:
             unique_algos = history_df["algorithm"].nunique()
-            st.metric("Unique Algorithms", unique_algos)
+            st.metric("Algorithmes Uniques", unique_algos)
 
         with col3:
             if "efficiency_score" in history_df.columns:
                 best_score = history_df["efficiency_score"].max()
-                st.metric("Best Efficiency Score", f"{best_score:.4f}")
+                st.metric("Meilleur Score d'Efficacité", f"{best_score:.4f}")
             else:
-                st.metric("Best Efficiency Score", "N/A")
+                st.metric("Meilleur Score d'Efficacité", "N/A")
 
         with col4:
             avg_win_rate = (
                 history_df["win_rate"].mean() if "win_rate" in history_df.columns else 0
             )
-            st.metric("Average Win Rate", f"{avg_win_rate:.1%}")
+            st.metric("Taux de Réussite Moyen", f"{avg_win_rate:.1%}")
 
         # Filtering options
-        st.subheader("Filter Results")
+        st.subheader("Filtrer les Résultats")
 
         col_filter1, col_filter2, col_filter3 = st.columns(3)
 
         with col_filter1:
             selected_algorithms = st.multiselect(
-                "Filter by Algorithm",
+                "Filtrer par Algorithme",
                 options=history_df["algorithm"].unique(),
                 default=history_df["algorithm"].unique(),
             )
@@ -66,7 +62,7 @@ def render_results_management_page():
         with col_filter2:
             if "efficiency_score" in history_df.columns:
                 min_efficiency = st.slider(
-                    "Minimum Efficiency Score",
+                    "Score d'Efficacité Minimum",
                     min_value=float(history_df["efficiency_score"].min()),
                     max_value=float(history_df["efficiency_score"].max()),
                     value=float(history_df["efficiency_score"].min()),
@@ -76,7 +72,9 @@ def render_results_management_page():
 
         with col_filter3:
             show_recent = st.selectbox(
-                "Show Results", ["All", "Last 10", "Last 20", "Last 50"], index=0
+                "Afficher les Résultats",
+                ["Tous", "10 Derniers", "20 Derniers", "50 Derniers"],
+                index=0,
             )
 
         # Apply filters
@@ -85,12 +83,12 @@ def render_results_management_page():
         if "efficiency_score" in filtered_df.columns:
             filtered_df = filtered_df[filtered_df["efficiency_score"] >= min_efficiency]
 
-        if show_recent != "All":
+        if show_recent != "Tous":
             n_recent = int(show_recent.split()[-1])
             filtered_df = filtered_df.tail(n_recent)
 
         # Display filtered results
-        st.subheader("Filtered Results")
+        st.subheader("Résultats Filtrés")
 
         # Select columns to display
         all_columns = filtered_df.columns.tolist()
@@ -107,7 +105,7 @@ def render_results_management_page():
         ]
 
         selected_columns = st.multiselect(
-            "Select Columns to Display",
+            "Sélectionner les Colonnes à Afficher",
             options=all_columns,
             default=available_default_columns,
         )
@@ -118,116 +116,118 @@ def render_results_management_page():
 
             # Quick statistics for filtered data
             if len(filtered_df) > 0:
-                st.subheader("Statistics for Filtered Data")
+                st.subheader("Statistiques pour les Données Filtrées")
 
                 stats_col1, stats_col2 = st.columns(2)
 
                 with stats_col1:
-                    st.write("**Algorithm Distribution:**")
+                    st.write("**Distribution des Algorithmes :**")
                     algo_counts = filtered_df["algorithm"].value_counts()
                     st.bar_chart(algo_counts)
 
                 with stats_col2:
                     if "efficiency_score" in filtered_df.columns:
-                        st.write("**Efficiency Score Distribution:**")
+                        st.write("**Distribution des Scores d'Efficacité :**")
                         st.line_chart(
                             filtered_df["efficiency_score"].reset_index(drop=True)
                         )
 
         # Download options
-        st.subheader("Download Results")
+        st.subheader("Télécharger les Résultats")
 
         download_col1, download_col2, download_col3 = st.columns(3)
 
         with download_col1:
-            if st.button("📥 Download Filtered as CSV"):
+            if st.button("📥 Télécharger les Filtrés en CSV"):
                 if selected_columns and len(filtered_df) > 0:
                     csv = filtered_df[selected_columns].to_csv(index=False)
                     st.download_button(
-                        label="Download CSV file",
+                        label="Télécharger le fichier CSV",
                         data=csv,
-                        file_name=f"taxi_rl_filtered_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                        file_name=f"taxi_rl_resultats_filtres_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                         mime="text/csv",
                     )
                 else:
-                    st.warning("No data to download")
+                    st.warning("Aucune donnée à télécharger")
 
         with download_col2:
-            if st.button("📥 Download All as JSON"):
+            if st.button("📥 Télécharger Tout en JSON"):
                 json_data = json.dumps(
                     st.session_state.results_history, indent=2, default=str
                 )
                 st.download_button(
-                    label="Download JSON file",
+                    label="Télécharger le fichier JSON",
                     data=json_data,
-                    file_name=f"taxi_rl_all_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                    file_name=f"taxi_rl_tous_resultats_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                     mime="application/json",
                 )
 
         with download_col3:
-            if st.button("📊 Generate Summary Report"):
+            if st.button("📊 Générer un Rapport de Synthèse"):
                 summary_report = data_manager.create_summary_report(
                     st.session_state.results_history
                 )
 
                 if summary_report:
-                    st.subheader("Summary Report")
+                    st.subheader("Rapport de Synthèse")
 
                     report_text = f"""
-# Taxi Driver RL Experiments Summary Report
-Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+# Rapport de Synthèse des Expériences RL Taxi Driver
+Généré le : {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
 
-## Overview
-- **Total Experiments**: {summary_report['total_experiments']}
-- **Algorithms Tested**: {', '.join(summary_report['algorithms_tested'])}
-- **Best Algorithm**: {summary_report.get('best_algorithm', 'N/A')}
+## Vue d'ensemble
+- **Expériences Totales** : {summary_report['total_experiments']}
+- **Algorithmes Testés** : {', '.join(summary_report['algorithms_tested'])}
+- **Meilleur Algorithme** : {summary_report.get('best_algorithm', 'N/A')}
 
-## Average Performance
-- **Mean Reward**: {summary_report['average_performance']['mean_reward']:.3f}
-- **Mean Steps**: {summary_report['average_performance']['mean_steps']:.1f}
-- **Win Rate**: {summary_report['average_performance']['win_rate']:.2%}
+## Performance Moyenne
+- **Récompense Moyenne** : {summary_report['average_performance']['mean_reward']:.3f}
+- **Étapes Moyennes** : {summary_report['average_performance']['mean_steps']:.1f}
+- **Taux de Réussite** : {summary_report['average_performance']['win_rate']:.2%}
 
-## Performance Ranges
-- **Reward Range**: {summary_report['performance_ranges']['reward_range'][0]:.3f} to {summary_report['performance_ranges']['reward_range'][1]:.3f}
-- **Steps Range**: {summary_report['performance_ranges']['steps_range'][0]:.1f} to {summary_report['performance_ranges']['steps_range'][1]:.1f}
-- **Win Rate Range**: {summary_report['performance_ranges']['win_rate_range'][0]:.2%} to {summary_report['performance_ranges']['win_rate_range'][1]:.2%}
+## Plages de Performance
+- **Plage de Récompense** : {summary_report['performance_ranges']['reward_range'][0]:.3f} à {summary_report['performance_ranges']['reward_range'][1]:.3f}
+- **Plage d'Étapes** : {summary_report['performance_ranges']['steps_range'][0]:.1f} à {summary_report['performance_ranges']['steps_range'][1]:.1f}
+- **Plage Taux de Réussite** : {summary_report['performance_ranges']['win_rate_range'][0]:.2%} à {summary_report['performance_ranges']['win_rate_range'][1]:.2%}
                     """
 
                     st.markdown(report_text)
 
                     st.download_button(
-                        label="📄 Download Report",
+                        label="📄 Télécharger le Rapport",
                         data=report_text,
-                        file_name=f"taxi_rl_summary_report_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md",
+                        file_name=f"taxi_rl_rapport_synthese_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md",
                         mime="text/markdown",
                     )
 
         # Data management actions
-        st.subheader("Data Management")
+        st.subheader("Gestion des Données")
 
         manage_col1, manage_col2, manage_col3 = st.columns(3)
 
         with manage_col1:
-            if st.button("🗑️ Clear All History", type="secondary"):
-                if st.button("⚠️ Confirm Clear All", type="secondary"):
+            if st.button("🗑️ Effacer Tout l'Historique", type="secondary"):
+                if st.button("⚠️ Confirmer l'Effacement", type="secondary"):
                     st.session_state.results_history = []
                     st.session_state.training_history = []
                     st.session_state.comparison_data = {}
                     VisualizationComponents.display_success_message(
-                        "✅ All history cleared!"
+                        "✅ Tout l'historique effacé !"
                     )
                     st.experimental_rerun()
 
         with manage_col2:
-            if st.button("🔄 Reset Session"):
+            if st.button("🔄 Réinitialiser la Session"):
                 for key in list(st.session_state.keys()):
                     if key not in ["env", "n_actions", "n_states"]:  # Keep environment
                         del st.session_state[key]
-                VisualizationComponents.display_success_message("✅ Session reset!")
+                VisualizationComponents.display_success_message(
+                    "✅ Session réinitialisée !"
+                )
                 st.experimental_rerun()
 
         with manage_col3:
-            if st.button("💾 Auto-Save Current Session"):
+            if st.button("💾 Sauvegarde Auto de la Session Actuelle"):
                 # Save current session data
                 session_data = {
                     "results_history": st.session_state.results_history,
@@ -236,40 +236,40 @@ Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                     "timestamp": datetime.now().isoformat(),
                 }
 
-                filename = (
-                    f"session_backup_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-                )
+                filename = f"sauvegarde_session_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
                 json_str = json.dumps(session_data, indent=2, default=str)
 
                 st.download_button(
-                    label="💾 Download Session Backup",
+                    label="💾 Télécharger la Sauvegarde de Session",
                     data=json_str,
                     file_name=filename,
                     mime="application/json",
                 )
 
     else:
-        st.info("No results available yet. Run some experiments to see results here!")
+        st.info(
+            "Aucun résultat disponible pour le moment. Lancez quelques expériences pour voir les résultats ici !"
+        )
 
-        st.subheader("Getting Started")
+        st.subheader("Pour Commencer")
         getting_started_tips = [
-            "🔬 **Run Experiments**: Start with Single Algorithm Testing to generate your first results",
-            "📊 **Compare Algorithms**: Use Algorithm Comparison to evaluate multiple approaches",
-            "🎯 **Optimize Parameters**: Try Hyperparameter Optimization for best performance",
-            "📈 **Analyze Results**: Use Advanced Analysis for detailed insights",
-            "💾 **Save Your Work**: Results are automatically tracked in your session",
+            "🔬 **Lancer des Expériences** : Commencez par le Test d'Algorithme Unique pour générer vos premiers résultats",
+            "📊 **Comparer les Algorithmes** : Utilisez la Comparaison d'Algorithmes pour évaluer plusieurs approches",
+            "🎯 **Optimiser les Paramètres** : Essayez l'Optimisation d'Hyperparamètres pour de meilleures performances",
+            "📈 **Analyser les Résultats** : Utilisez l'Analyse Avancée pour des aperçus détaillés",
+            "💾 **Sauvegarder votre Travail** : Les résultats sont automatiquement suivis dans votre session",
         ]
 
         for tip in getting_started_tips:
             st.markdown(f"- {tip}")
 
     # Load saved results section
-    st.subheader("Load Previous Results")
+    st.subheader("Charger des Résultats Précédents")
 
     uploaded_file = st.file_uploader(
-        "Choose a results file",
+        "Choisissez un fichier de résultats",
         type=["json", "csv"],
-        help="Upload a previously saved results file to continue your analysis",
+        help="Téléchargez un fichier de résultats précédemment sauvegardé pour continuer votre analyse",
     )
 
     if uploaded_file is not None:
@@ -294,45 +294,47 @@ Generated on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
                     # Direct list of results
                     st.session_state.results_history.extend(data)
                 else:
-                    st.error("Unrecognized JSON format")
+                    st.error("Format JSON non reconnu")
 
             elif uploaded_file.name.endswith(".csv"):
                 df = pd.read_csv(uploaded_file)
                 st.session_state.results_history.extend(df.to_dict("records"))
 
             VisualizationComponents.display_success_message(
-                "✅ Results loaded successfully!"
+                "✅ Résultats chargés avec succès !"
             )
             st.experimental_rerun()
 
         except Exception as e:
-            VisualizationComponents.display_error_message(f"Error loading file: {e}")
+            VisualizationComponents.display_error_message(
+                f"Erreur lors du chargement du fichier : {e}"
+            )
 
     # Show saved files in the results directory
     saved_files = data_manager.get_saved_files()
     if saved_files:
-        st.subheader("Previously Saved Files")
+        st.subheader("Fichiers Précédemment Sauvegardés")
 
-        st.write("📁 **Files in results directory:**")
+        st.write("📁 **Fichiers dans le répertoire de résultats :**")
         for file_path in saved_files[:10]:  # Show last 10 files
             file_name = file_path.split("/")[-1]
             file_size = (
-                f"{os.path.getsize(file_path) / 1024:.1f} KB"
+                f"{os.path.getsize(file_path) / 1024:.1f} Ko"
                 if os.path.exists(file_path)
-                else "Unknown"
+                else "Inconnu"
             )
             file_date = (
                 datetime.fromtimestamp(os.path.getmtime(file_path)).strftime(
                     "%Y-%m-%d %H:%M"
                 )
                 if os.path.exists(file_path)
-                else "Unknown"
+                else "Inconnu"
             )
 
             st.write(f"- **{file_name}** ({file_size}) - {file_date}")
 
         if len(saved_files) > 10:
-            st.write(f"... and {len(saved_files) - 10} more files")
+            st.write(f"... et {len(saved_files) - 10} fichiers de plus")
 
 
 # Import os for file operations

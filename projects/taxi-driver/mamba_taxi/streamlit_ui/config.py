@@ -1,14 +1,9 @@
-"""
-Streamlit UI Configuration and Styling
-"""
-
 import streamlit as st
 
 
 def setup_page_config():
-    """Set up the Streamlit page configuration"""
     st.set_page_config(
-        page_title="🚕 Taxi Driver RL Interface",
+        page_title="🚕 Interface RL Chauffeur de Taxi",
         page_icon="🚕",
         layout="wide",
         initial_sidebar_state="expanded",
@@ -16,7 +11,6 @@ def setup_page_config():
 
 
 def load_custom_css():
-    """Load custom CSS styles for the application"""
     st.markdown(
         """
     <style>
@@ -72,20 +66,18 @@ def load_custom_css():
     )
 
 
-# Application constants
-APP_TITLE = "🚕 Taxi Driver RL Interactive Interface"
+APP_TITLE = "🚕 Interface Interactive RL Chauffeur de Taxi"
 PAGES = [
-    "🏠 Home",
-    "🔧 Single Algorithm Testing",
-    "📊 Algorithm Comparison",
-    "🎯 Hyperparameter Optimization",
-    "📈 Advanced Analysis",
-    "💾 Results Management",
+    "🏠 Accueil",
+    "🔧 Test d'Algorithme Unique",
+    "📊 Comparaison d'Algorithmes",
+    "🎯 Optimisation d'Hyperparamètres",
+    "📈 Analyse Avancée",
+    "💾 Gestion des Résultats",
 ]
 
 ALGORITHMS = ["BruteForce", "Q-Learning", "SARSA", "DQN"]
 
-# Default parameter ranges
 DEFAULT_PARAMS = {
     "alpha": {"min": 0.01, "max": 1.0, "default": 0.15, "step": 0.01},
     "gamma": {"min": 0.8, "max": 0.999, "default": 0.99, "step": 0.001},

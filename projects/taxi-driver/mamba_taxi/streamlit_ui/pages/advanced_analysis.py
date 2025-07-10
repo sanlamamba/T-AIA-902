@@ -19,32 +19,33 @@ from ..components.visualizations import VisualizationComponents
 
 
 def render_advanced_analysis_page():
-    """Render the advanced analysis page"""
-    st.header("Advanced Statistical Analysis")
+    st.header("Analyse Statistique Avancée")
 
     if not st.session_state.comparison_data:
         VisualizationComponents.display_warning_message(
-            "⚠️ Please run an algorithm comparison first to see advanced analysis."
+            "⚠️ Veuillez d'abord exécuter une comparaison d'algorithmes pour voir l'analyse avancée."
         )
 
         # Show what advanced analysis includes
-        st.subheader("What's Included in Advanced Analysis")
+        st.subheader("Ce qui est Inclus dans l'Analyse Avancée")
 
         features = [
-            "📊 **Descriptive Statistics**: Mean, std, min, max, coefficient of variation for all metrics",
-            "🎯 **Performance Clustering**: Automatic grouping of similar performing algorithms using K-means",
-            "📈 **Hypothesis Testing**: Statistical significance testing between algorithms (Mann-Whitney U)",
-            "🔢 **Confidence Intervals**: 95% confidence intervals for all performance metrics",
-            "📉 **Effect Size Analysis**: Cohen's d for measuring practical significance",
-            "🔄 **Convergence Analysis**: Training convergence patterns and stability metrics",
-            "📋 **Performance Ranking**: Comprehensive ranking with multiple criteria",
-            "⚡ **Outlier Detection**: Identification of unusual performance patterns",
+            "📊 **Statistiques Descriptives** : Moyenne, écart-type, min, max, coefficient de variation pour toutes les métriques",
+            "🎯 **Clustering de Performance** : Regroupement automatique d'algorithmes aux performances similaires avec K-means",
+            "📈 **Tests d'Hypothèses** : Tests de signification statistique entre algorithmes (Mann-Whitney U)",
+            "🔢 **Intervalles de Confiance** : Intervalles de confiance à 95% pour toutes les métriques de performance",
+            "📉 **Analyse de la Taille d'Effet** : d de Cohen pour mesurer la signification pratique",
+            "🔄 **Analyse de Convergence** : Modèles de convergence d'entraînement et métriques de stabilité",
+            "📋 **Classement de Performance** : Classement compréhensif avec critères multiples",
+            "⚡ **Détection d'Aberrations** : Identification de modèles de performance inhabituels",
         ]
 
         for feature in features:
             st.markdown(f"- {feature}")
 
-        st.info("💡 Run an algorithm comparison to unlock these advanced analytics!")
+        st.info(
+            "💡 Exécutez une comparaison d'algorithmes pour débloquer ces analyses avancées !"
+        )
         return
 
     results = st.session_state.comparison_data["results"]
@@ -54,27 +55,27 @@ def render_advanced_analysis_page():
     stat_analyzer = AdvancedStatisticalAnalyzer()
 
     # Comprehensive statistical analysis
-    with st.spinner("Performing advanced statistical analysis..."):
+    with st.spinner("Exécution de l'analyse statistique avancée..."):
         try:
             statistical_analysis = stat_analyzer.comprehensive_analysis(
                 results, list(training_data.values())
             )
         except Exception as e:
-            st.error(f"Error in statistical analysis: {e}")
+            st.error(f"Erreur dans l'analyse statistique : {e}")
             statistical_analysis = {}
 
     # Create tabs for different analyses
     tab1, tab2, tab3, tab4 = st.tabs(
         [
-            "📊 Descriptive Stats",
-            "🎯 Clustering & Ranking",
-            "📈 Hypothesis Testing",
-            "🔢 Confidence Intervals",
+            "📊 Stats Descriptives",
+            "🎯 Clustering et Classement",
+            "📈 Tests d'Hypothèses",
+            "🔢 Intervalles de Confiance",
         ]
     )
 
     with tab1:
-        st.subheader("Descriptive Statistics")
+        st.subheader("Statistiques Descriptives")
 
         # Descriptive statistics
         if "descriptive_stats" in statistical_analysis:
@@ -83,11 +84,21 @@ def render_advanced_analysis_page():
             stats_data = []
             for metric, stats in desc_stats.items():
                 if isinstance(stats, dict):
+                    metric_name = metric.replace("_", " ").title()
+                    # Translate specific metric names
+                    metric_translations = {
+                        "Mean Reward": "Récompense Moyenne",
+                        "Mean Steps": "Étapes Moyennes",
+                        "Win Rate": "Taux de Réussite",
+                        "Efficiency Score": "Score d'Efficacité",
+                    }
+                    metric_name = metric_translations.get(metric_name, metric_name)
+
                     stats_data.append(
                         {
-                            "Metric": metric.replace("_", " ").title(),
-                            "Mean": f"{stats.get('mean', 0):.3f}",
-                            "Std Dev": f"{stats.get('std', 0):.3f}",
+                            "Métrique": metric_name,
+                            "Moyenne": f"{stats.get('mean', 0):.3f}",
+                            "Écart-Type": f"{stats.get('std', 0):.3f}",
                             "Min": f"{stats.get('min', 0):.3f}",
                             "Max": f"{stats.get('max', 0):.3f}",
                             "CV (%)": f"{stats.get('cv', 0)*100:.1f}",
@@ -99,24 +110,24 @@ def render_advanced_analysis_page():
                 st.dataframe(stats_df, use_container_width=True)
 
                 # Interpretation
-                st.subheader("Statistical Interpretation")
+                st.subheader("Interprétation Statistique")
 
                 interpretation = []
                 for row in stats_data:
                     cv = float(row["CV (%)"])
                     if cv < 10:
-                        variability = "Low variability"
+                        variability = "Faible variabilité"
                     elif cv < 30:
-                        variability = "Moderate variability"
+                        variability = "Variabilité modérée"
                     else:
-                        variability = "High variability"
+                        variability = "Forte variabilité"
 
                     interpretation.append(
                         {
-                            "Metric": row["Metric"],
-                            "Variability": variability,
-                            "Range": f"{row['Min']} - {row['Max']}",
-                            "Assessment": "Stable" if cv < 20 else "Variable",
+                            "Métrique": row["Métrique"],
+                            "Variabilité": variability,
+                            "Plage": f"{row['Min']} - {row['Max']}",
+                            "Évaluation": "Stable" if cv < 20 else "Variable",
                         }
                     )
 
@@ -124,7 +135,7 @@ def render_advanced_analysis_page():
                 st.dataframe(interp_df, use_container_width=True)
 
         # Performance summary by algorithm
-        st.subheader("Performance by Algorithm")
+        st.subheader("Performance par Algorithme")
         results_df = pd.DataFrame(results)
 
         if not results_df.empty:
@@ -139,20 +150,30 @@ def render_advanced_analysis_page():
 
             if available_metrics:
                 summary_table = results_df.set_index("algorithm")[available_metrics]
+                # Translate column names
+                column_translations = {
+                    "Mean Reward": "Récompense Moyenne",
+                    "Win Rate": "Taux de Réussite",
+                    "Efficiency Score": "Score d'Efficacité",
+                    "Mean Steps": "Étapes Moyennes",
+                }
                 summary_table.columns = [
-                    col.replace("_", " ").title() for col in summary_table.columns
+                    column_translations.get(
+                        col.replace("_", " ").title(), col.replace("_", " ").title()
+                    )
+                    for col in summary_table.columns
                 ]
                 st.dataframe(summary_table, use_container_width=True)
 
     with tab2:
-        st.subheader("Performance Clustering")
+        st.subheader("Clustering de Performance")
 
         # Performance clustering
         if "performance_clustering" in statistical_analysis:
             clustering = statistical_analysis["performance_clustering"]
             if "error" not in clustering:
                 st.write(
-                    f"**Optimal number of clusters:** {clustering.get('n_clusters', 'N/A')}"
+                    f"**Nombre optimal de clusters :** {clustering.get('n_clusters', 'N/A')}"
                 )
 
                 if "pca_components" in clustering and "cluster_labels" in clustering:
@@ -164,7 +185,7 @@ def render_advanced_analysis_page():
                             "PC1": [p[0] for p in pca_data],
                             "PC2": [p[1] for p in pca_data],
                             "Cluster": cluster_labels,
-                            "Algorithm": [r["algorithm"] for r in results],
+                            "Algorithme": [r["algorithm"] for r in results],
                         }
                     )
 
@@ -175,22 +196,22 @@ def render_advanced_analysis_page():
                         x="PC1",
                         y="PC2",
                         color="Cluster",
-                        hover_data=["Algorithm"],
-                        title="Performance Clustering (PCA Visualization)",
+                        hover_data=["Algorithme"],
+                        title="Clustering de Performance (Visualisation ACP)",
                         labels={
-                            "PC1": "Principal Component 1",
-                            "PC2": "Principal Component 2",
+                            "PC1": "Composante Principale 1",
+                            "PC2": "Composante Principale 2",
                         },
                     )
                     st.plotly_chart(fig, use_container_width=True)
 
                     # Cluster interpretation
-                    st.subheader("Cluster Analysis")
+                    st.subheader("Analyse des Clusters")
                     cluster_summary = []
 
                     for cluster_id in sorted(set(cluster_labels)):
                         algorithms_in_cluster = [
-                            cluster_df.loc[i, "Algorithm"]
+                            cluster_df.loc[i, "Algorithme"]
                             for i in range(len(cluster_df))
                             if cluster_df.loc[i, "Cluster"] == cluster_id
                         ]
@@ -198,9 +219,9 @@ def render_advanced_analysis_page():
                         cluster_summary.append(
                             {
                                 "Cluster": f"Cluster {cluster_id}",
-                                "Algorithms": ", ".join(algorithms_in_cluster),
-                                "Size": len(algorithms_in_cluster),
-                                "Interpretation": "Similar performance characteristics",
+                                "Algorithmes": ", ".join(algorithms_in_cluster),
+                                "Taille": len(algorithms_in_cluster),
+                                "Interprétation": "Caractéristiques de performance similaires",
                             }
                         )
 
@@ -209,11 +230,11 @@ def render_advanced_analysis_page():
                         st.dataframe(cluster_df_summary, use_container_width=True)
             else:
                 st.info(
-                    "Clustering analysis not available - insufficient data or all algorithms perform similarly."
+                    "Analyse de clustering non disponible - données insuffisantes ou tous les algorithmes performent de manière similaire."
                 )
 
         # Performance ranking
-        st.subheader("Comprehensive Performance Ranking")
+        st.subheader("Classement de Performance Compréhensif")
 
         if results:
             ranking_data = []
@@ -238,38 +259,38 @@ def render_advanced_analysis_page():
 
                 ranking_data.append(
                     {
-                        "Algorithm": result["algorithm"],
-                        "Efficiency Score": f"{efficiency:.4f}",
-                        "Win Rate": f"{win_rate:.2%}",
-                        "Mean Reward": f"{reward:.2f}",
-                        "Composite Score": f"{composite_score:.4f}",
+                        "Algorithme": result["algorithm"],
+                        "Score d'Efficacité": f"{efficiency:.4f}",
+                        "Taux de Réussite": f"{win_rate:.2%}",
+                        "Récompense Moyenne": f"{reward:.2f}",
+                        "Score Composite": f"{composite_score:.4f}",
                     }
                 )
 
             ranking_df = pd.DataFrame(ranking_data)
-            ranking_df["Rank"] = (
-                ranking_df["Composite Score"]
+            ranking_df["Rang"] = (
+                ranking_df["Score Composite"]
                 .astype(float)
                 .rank(ascending=False, method="min")
                 .astype(int)
             )
-            ranking_df = ranking_df.sort_values("Rank")
+            ranking_df = ranking_df.sort_values("Rang")
 
             # Reorder columns
             ranking_df = ranking_df[
                 [
-                    "Rank",
-                    "Algorithm",
-                    "Composite Score",
-                    "Efficiency Score",
-                    "Win Rate",
-                    "Mean Reward",
+                    "Rang",
+                    "Algorithme",
+                    "Score Composite",
+                    "Score d'Efficacité",
+                    "Taux de Réussite",
+                    "Récompense Moyenne",
                 ]
             ]
             st.dataframe(ranking_df, use_container_width=True)
 
     with tab3:
-        st.subheader("Statistical Significance Testing")
+        st.subheader("Tests de Signification Statistique")
 
         # Hypothesis testing
         if "hypothesis_testing" in statistical_analysis:
@@ -277,7 +298,7 @@ def render_advanced_analysis_page():
             if "error" not in hypothesis_tests:
 
                 for comparison, tests in hypothesis_tests.items():
-                    st.write(f"**{comparison}:**")
+                    st.write(f"**{comparison} :**")
                     test_results = []
 
                     for metric, test_data in tests.items():

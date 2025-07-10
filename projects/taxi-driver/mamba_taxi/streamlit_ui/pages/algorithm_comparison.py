@@ -1,7 +1,3 @@
-"""
-Algorithm Comparison Page
-"""
-
 import streamlit as st
 import pandas as pd
 from datetime import datetime
@@ -13,75 +9,78 @@ from ..utils.data_manager import DataManager
 
 
 def render_algorithm_comparison_page():
-    """Render the algorithm comparison page"""
-    st.header("Algorithm Comparison")
+    st.header("Comparaison d'Algorithmes")
 
     # Algorithm selection for comparison
-    st.subheader("Select Algorithms to Compare")
+    st.subheader("Sélectionner les Algorithmes à Comparer")
     algorithms_to_compare = st.multiselect(
-        "Choose algorithms",
+        "Choisir les algorithmes",
         ALGORITHMS,
         default=["BruteForce", "Q-Learning"],
-        help="Select at least 2 algorithms to compare their performance",
+        help="Sélectionnez au moins 2 algorithmes pour comparer leurs performances",
     )
 
     if len(algorithms_to_compare) < 2:
         VisualizationComponents.display_warning_message(
-            "⚠️ Please select at least 2 algorithms to compare."
+            "⚠️ Veuillez sélectionner au moins 2 algorithmes à comparer."
         )
         return
 
     col1, col2 = st.columns([1, 1])
 
     with col1:
-        st.subheader("Comparison Parameters")
+        st.subheader("Paramètres de Comparaison")
         train_episodes = st.number_input(
-            "Training Episodes",
+            "Épisodes d'Entraînement",
             min_value=100,
             max_value=3000,
             value=1000,
             key="comp_train",
-            help="Number of episodes for training each algorithm",
+            help="Nombre d'épisodes pour entraîner chaque algorithme",
         )
         test_episodes = st.number_input(
-            "Test Episodes",
+            "Épisodes de Test",
             min_value=50,
             max_value=500,
             value=100,
             key="comp_test",
-            help="Number of episodes for evaluating each algorithm",
+            help="Nombre d'épisodes pour évaluer chaque algorithme",
         )
 
         # Global parameters for all algorithms
-        st.subheader("Algorithm Parameters")
+        st.subheader("Paramètres d'Algorithme")
         alpha = st.slider(
-            "Learning Rate (α)",
+            "Taux d'Apprentissage (α)",
             0.01,
             1.0,
             0.15,
             0.01,
             key="comp_alpha",
-            help="Learning rate for all algorithms",
+            help="Taux d'apprentissage pour tous les algorithmes",
         )
         gamma = st.slider(
-            "Discount Factor (γ)",
+            "Facteur d'Actualisation (γ)",
             0.8,
             0.999,
             0.99,
             0.001,
             key="comp_gamma",
-            help="Discount factor for all algorithms",
+            help="Facteur d'actualisation pour tous les algorithmes",
         )
 
     with col2:
-        st.subheader("Comparison Options")
-        include_stats = st.checkbox("Include Statistical Analysis", value=True)
-        show_training_curves = st.checkbox("Show Training Curves", value=True)
-        save_results_auto = st.checkbox("Auto-save Results", value=True)
-        show_radar_chart = st.checkbox("Show Radar Chart", value=True)
+        st.subheader("Options de Comparaison")
+        include_stats = st.checkbox("Inclure l'Analyse Statistique", value=True)
+        show_training_curves = st.checkbox(
+            "Afficher les Courbes d'Entraînement", value=True
+        )
+        save_results_auto = st.checkbox(
+            "Sauvegarde Automatique des Résultats", value=True
+        )
+        show_radar_chart = st.checkbox("Afficher le Graphique Radar", value=True)
 
     # Run comparison button
-    if st.button("🔄 Run Comparison", type="primary"):
+    if st.button("🔄 Lancer la Comparaison", type="primary"):
         data_manager = DataManager()
         training_manager = TrainingManager(st.session_state.env)
 
@@ -98,7 +97,7 @@ def render_algorithm_comparison_page():
         try:
             for i, algorithm in enumerate(algorithms_to_compare):
                 status_text.text(
-                    f"🏃 Training {algorithm}... ({i+1}/{len(algorithms_to_compare)})"
+                    f"🏃 Entraînement {algorithm}... ({i+1}/{len(algorithms_to_compare)})"
                 )
 
                 # Prepare parameters
@@ -130,12 +129,12 @@ def render_algorithm_comparison_page():
 
                 # Update results display in real-time
                 with results_container.container():
-                    st.subheader("Current Results")
+                    st.subheader("Résultats Actuels")
                     cols = st.columns(len(results))
                     for j, res in enumerate(results):
                         VisualizationComponents.display_metrics_in_column(res, cols[j])
 
-            status_text.text("✅ All algorithms completed!")
+            status_text.text("✅ Tous les algorithmes terminés !")
 
             # Store in session state
             st.session_state.comparison_data = {
@@ -145,20 +144,24 @@ def render_algorithm_comparison_page():
             }
 
             # Display comprehensive results
-            st.subheader("Comparison Results")
+            st.subheader("Résultats de Comparaison")
 
             # Performance metrics grid
-            st.subheader("Performance Overview")
+            st.subheader("Aperçu des Performances")
             cols = st.columns(len(results))
             for i, result in enumerate(results):
                 VisualizationComponents.display_metrics_in_column(result, cols[i])
 
             # Comparison charts
-            st.subheader("Visual Comparison")
+            st.subheader("Comparaison Visuelle")
 
             # Create tabs for different visualizations
             tab1, tab2, tab3 = st.tabs(
-                ["📊 Bar Charts", "🎯 Radar Chart", "📈 Training Curves"]
+                [
+                    "📊 Graphiques en Barres",
+                    "🎯 Graphique Radar",
+                    "📈 Courbes d'Entraînement",
+                ]
             )
 
             with tab1:
@@ -176,7 +179,9 @@ def render_algorithm_comparison_page():
                     if radar_fig:
                         st.plotly_chart(radar_fig, use_container_width=True)
                 else:
-                    st.info("Radar chart disabled. Enable it in the options above.")
+                    st.info(
+                        "Graphique radar désactivé. Activez-le dans les options ci-dessus."
+                    )
 
             with tab3:
                 # Training curves
@@ -189,50 +194,54 @@ def render_algorithm_comparison_page():
                     if training_fig:
                         st.plotly_chart(training_fig, use_container_width=True)
                 else:
-                    st.info("No training data available or training curves disabled.")
+                    st.info(
+                        "Aucune donnée d'entraînement disponible ou courbes d'entraînement désactivées."
+                    )
 
             # Statistical analysis
             if include_stats:
-                st.subheader("Statistical Analysis")
+                st.subheader("Analyse Statistique")
 
                 # Create summary table
                 df = pd.DataFrame(results)
                 st.dataframe(df, use_container_width=True)
 
                 # Performance ranking
-                st.subheader("Performance Ranking")
+                st.subheader("Classement des Performances")
                 ranking_data = []
                 for result in results:
                     ranking_data.append(
                         {
-                            "Algorithm": result["algorithm"],
-                            "Efficiency Score": result.get("efficiency_score", 0),
-                            "Mean Reward": result["mean_reward"],
-                            "Win Rate": result["win_rate"],
-                            "Mean Steps": result["mean_steps"],
+                            "Algorithme": result["algorithm"],
+                            "Score d'Efficacité": result.get("efficiency_score", 0),
+                            "Récompense Moyenne": result["mean_reward"],
+                            "Taux de Réussite": result["win_rate"],
+                            "Étapes Moyennes": result["mean_steps"],
                         }
                     )
 
                 ranking_df = pd.DataFrame(ranking_data)
-                ranking_df = ranking_df.sort_values("Efficiency Score", ascending=False)
-                ranking_df["Rank"] = range(1, len(ranking_df) + 1)
+                ranking_df = ranking_df.sort_values(
+                    "Score d'Efficacité", ascending=False
+                )
+                ranking_df["Rang"] = range(1, len(ranking_df) + 1)
 
                 # Reorder columns
                 ranking_df = ranking_df[
                     [
-                        "Rank",
-                        "Algorithm",
-                        "Efficiency Score",
-                        "Mean Reward",
-                        "Win Rate",
-                        "Mean Steps",
+                        "Rang",
+                        "Algorithme",
+                        "Score d'Efficacité",
+                        "Récompense Moyenne",
+                        "Taux de Réussite",
+                        "Étapes Moyennes",
                     ]
                 ]
                 st.dataframe(ranking_df, use_container_width=True)
 
                 # Performance improvement over baseline
                 if any(r["algorithm"] == "BruteForce" for r in results):
-                    st.subheader("Improvement Over BruteForce Baseline")
+                    st.subheader("Amélioration par Rapport à la Référence BruteForce")
                     bf_result = next(
                         r for r in results if r["algorithm"] == "BruteForce"
                     )
@@ -266,12 +275,14 @@ def render_algorithm_comparison_page():
 
                             improvement_data.append(
                                 {
-                                    "Algorithm": result["algorithm"],
-                                    "Reward Improvement (%)": round(
+                                    "Algorithme": result["algorithm"],
+                                    "Amélioration Récompense (%)": round(
                                         reward_improvement, 1
                                     ),
-                                    "Step Improvement (%)": round(step_improvement, 1),
-                                    "Efficiency Gain (x)": round(efficiency_gain, 2),
+                                    "Amélioration Étapes (%)": round(
+                                        step_improvement, 1
+                                    ),
+                                    "Gain d'Efficacité (x)": round(efficiency_gain, 2),
                                 }
                             )
 
@@ -285,7 +296,7 @@ def render_algorithm_comparison_page():
                     results, training_data, "comparison"
                 )
                 VisualizationComponents.display_success_message(
-                    f"✅ Results automatically saved to {json_file}"
+                    f"✅ Résultats sauvegardés automatiquement dans {json_file}"
                 )
 
                 # Download buttons
@@ -294,7 +305,7 @@ def render_algorithm_comparison_page():
                     if csv_file:
                         with open(csv_file, "r") as f:
                             st.download_button(
-                                "📥 Download CSV",
+                                "📥 Télécharger CSV",
                                 f.read(),
                                 file_name=f"comparison_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                                 mime="text/csv",
@@ -303,7 +314,7 @@ def render_algorithm_comparison_page():
                 with col_download2:
                     with open(json_file, "r") as f:
                         st.download_button(
-                            "📥 Download JSON",
+                            "📥 Télécharger JSON",
                             f.read(),
                             file_name=f"comparison_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
                             mime="application/json",
@@ -311,23 +322,23 @@ def render_algorithm_comparison_page():
 
         except Exception as e:
             progress_bar.progress(0)
-            status_text.text("❌ Error occurred!")
+            status_text.text("❌ Erreur survenue !")
             VisualizationComponents.display_error_message(
-                f"An error occurred during comparison: {str(e)}"
+                f"Une erreur s'est produite lors de la comparaison : {str(e)}"
             )
-            st.error(f"Comparison failed: {e}")
+            st.error(f"Échec de la comparaison : {e}")
 
     # Show previous comparison if available
     elif st.session_state.comparison_data:
-        st.subheader("Previous Comparison Results")
+        st.subheader("Résultats de Comparaison Précédents")
 
         previous_results = st.session_state.comparison_data["results"]
         previous_training = st.session_state.comparison_data["training_data"]
 
         # Quick overview
-        st.write(f"**Timestamp:** {st.session_state.comparison_data['timestamp']}")
+        st.write(f"**Horodatage :** {st.session_state.comparison_data['timestamp']}")
         st.write(
-            f"**Algorithms Compared:** {', '.join([r['algorithm'] for r in previous_results])}"
+            f"**Algorithmes Comparés :** {', '.join([r['algorithm'] for r in previous_results])}"
         )
 
         # Show condensed results
@@ -336,6 +347,6 @@ def render_algorithm_comparison_page():
             VisualizationComponents.display_metrics_in_column(result, cols[i])
 
         # Option to clear previous results
-        if st.button("🗑️ Clear Previous Results"):
+        if st.button("🗑️ Effacer les Résultats Précédents"):
             st.session_state.comparison_data = {}
             st.experimental_rerun()
