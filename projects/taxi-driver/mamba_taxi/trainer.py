@@ -31,7 +31,6 @@ def train_agent(env, agent, n_episodes, algorithm_name):
             if algorithm_name != "SARSA":
                 action = agent.get_action(state, explore=True)
 
-            # Track Q-value changes for tabular methods
             if hasattr(agent, "q_table"):
                 old_q = agent.q_table[state, action].copy()
 
@@ -48,7 +47,6 @@ def train_agent(env, agent, n_episodes, algorithm_name):
                 agent.remember(state, action, reward, next_state, done)
                 agent.replay()
 
-            # Track Q-value changes
             if hasattr(agent, "q_table"):
                 new_q = agent.q_table[state, action]
                 q_change = abs(new_q - old_q)
@@ -64,13 +62,11 @@ def train_agent(env, agent, n_episodes, algorithm_name):
         steps.append(step_count)
         success_rate_window.append(1 if total_reward > 0 else 0)
 
-        # Track exploration rate
         if hasattr(agent, "epsilon"):
             exploration_rates.append(agent.epsilon)
         else:
             exploration_rates.append(0)
 
-        # Track average Q-value change for this episode
         if episode_q_changes:
             q_value_changes.append(np.mean(episode_q_changes))
         else:
@@ -95,14 +91,12 @@ def train_agent(env, agent, n_episodes, algorithm_name):
 
     training_time = time.time() - start_time
 
-    # Calculate advanced metrics
     final_performance = (
         np.mean(rewards[-convergence_window:])
         if len(rewards) >= convergence_window
         else np.mean(rewards)
     )
 
-    # Learning efficiency metrics
     learning_curve_auc = _calculate_learning_curve_auc(rewards)
     stability_score = _calculate_stability_score(
         rewards[-convergence_window:] if len(rewards) >= convergence_window else rewards
@@ -139,7 +133,6 @@ def _calculate_learning_curve_auc(rewards, window_size=50):
     for i in range(window_size, len(rewards)):
         smoothed_rewards.append(np.mean(rewards[i - window_size : i]))
 
-    # Normalize to [0, 1] and calculate AUC
     if len(smoothed_rewards) > 0:
         min_reward = min(smoothed_rewards)
         max_reward = max(smoothed_rewards)
@@ -159,8 +152,8 @@ def _calculate_stability_score(rewards):
     variance = np.var(rewards)
     mean_reward = np.mean(rewards)
     if mean_reward != 0:
-        cv = np.sqrt(variance) / abs(mean_reward)  # Coefficient of variation
-        return 1 / (1 + cv)  # Higher score = more stable
+        cv = np.sqrt(variance) / abs(mean_reward)
+        return 1 / (1 + cv)
     return 0
 
 
@@ -171,7 +164,7 @@ def _calculate_sample_efficiency(rewards, success_rates, threshold=0.8):
         window_success = np.mean(success_rates[i - window_size : i])
         if window_success >= threshold:
             return i
-    return len(rewards)  # Never reached threshold
+    return len(rewards)
 
 
 def _find_convergence_point(rewards, window_size=100):
@@ -183,7 +176,6 @@ def _find_convergence_point(rewards, window_size=100):
         current_window = rewards[i : i + window_size]
         next_window = rewards[i + window_size : i + 2 * window_size]
 
-        # Check if the difference between windows is small (converged)
         if abs(np.mean(current_window) - np.mean(next_window)) < 0.5:
             return i
 
@@ -239,11 +231,9 @@ def evaluate_agent(env, agent, n_episodes, algorithm_name, render=False):
 
         consecutive_wins.append(current_win_streak)
 
-    # Advanced statistical metrics
     rewards_array = np.array(test_rewards)
     steps_array = np.array(test_steps)
 
-    # Percentile analysis
     reward_percentiles = {
         "25th": np.percentile(rewards_array, 25),
         "50th": np.percentile(rewards_array, 50),
@@ -260,7 +250,6 @@ def evaluate_agent(env, agent, n_episodes, algorithm_name, render=False):
         "95th": np.percentile(steps_array, 95),
     }
 
-    # Consistency metrics
     reward_cv = (
         np.std(rewards_array) / np.mean(rewards_array)
         if np.mean(rewards_array) != 0
@@ -272,7 +261,6 @@ def evaluate_agent(env, agent, n_episodes, algorithm_name, render=False):
         else float("inf")
     )
 
-    # Performance reliability
     success_consistency = wins / n_episodes
     performance_index = (np.mean(rewards_array) * success_consistency) / (
         np.mean(steps_array) + 1

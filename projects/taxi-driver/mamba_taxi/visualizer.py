@@ -5,7 +5,6 @@ from scipy import stats
 import seaborn as sns
 from matplotlib.patches import Rectangle
 
-# Set style for beautiful plots
 plt.style.use("seaborn-v0_8")
 sns.set_palette("husl")
 
@@ -15,35 +14,27 @@ def plot_results(results, training_data):
     fig = plt.figure(figsize=(20, 16))
     gs = fig.add_gridspec(4, 4, hspace=0.3, wspace=0.3)
 
-    # 1. Performance Comparison (Multi-metric)
     ax1 = fig.add_subplot(gs[0, :2])
     _plot_performance_comparison(ax1, results)
 
-    # 2. Training Progress
     ax2 = fig.add_subplot(gs[0, 2:])
     _plot_training_progress(ax2, training_data)
 
-    # 3. Statistical Distribution
     ax3 = fig.add_subplot(gs[1, :2])
     _plot_statistical_distributions(ax3, results)
 
-    # 4. Convergence Analysis
     ax4 = fig.add_subplot(gs[1, 2:])
     _plot_convergence_analysis(ax4, training_data)
 
-    # 5. Advanced Metrics Radar Chart
     ax5 = fig.add_subplot(gs[2, :2], projection="polar")
     _plot_radar_chart(ax5, results)
 
-    # 6. Learning Efficiency
     ax6 = fig.add_subplot(gs[2, 2:])
     _plot_learning_efficiency(ax6, training_data)
 
-    # 7. Performance Reliability
     ax7 = fig.add_subplot(gs[3, :2])
     _plot_performance_reliability(ax7, results)
 
-    # 8. Summary Statistics Table
     ax8 = fig.add_subplot(gs[3, 2:])
     _create_advanced_summary_table(ax8, results)
 
@@ -53,7 +44,6 @@ def plot_results(results, training_data):
     plt.savefig("comprehensive_analysis.png", dpi=300, bbox_inches="tight")
     plt.show()
 
-    # Generate detailed statistical report
     _generate_statistical_report(results, training_data)
 
 
@@ -62,7 +52,6 @@ def _plot_performance_comparison(ax, results):
     df = pd.DataFrame(results)
     algorithms = df["algorithm"].values
 
-    # Metrics to compare
     metrics = {
         "Win Rate": "win_rate",
         "Efficiency Score": "efficiency_score",
@@ -80,7 +69,6 @@ def _plot_performance_comparison(ax, results):
             x + i * width, values, width, label=label, color=colors[i], alpha=0.8
         )
 
-        # Add value labels on bars
         for bar, value in zip(bars, values):
             height = bar.get_height()
             ax.text(
@@ -109,11 +97,9 @@ def _plot_training_progress(ax, training_data):
             rewards = data["rewards"]
             episodes = range(len(rewards))
 
-            # Calculate moving average and confidence interval
             window = 100
             smoothed = _smooth_curve(rewards, window)
 
-            # Calculate rolling standard deviation for confidence interval
             rolling_std = []
             for i in range(len(rewards)):
                 start = max(0, i - window // 2)
@@ -155,7 +141,6 @@ def _plot_statistical_distributions(ax, results):
         )
         return
 
-    # Box plot for reward distributions
     reward_data = []
     labels = []
 
@@ -167,7 +152,6 @@ def _plot_statistical_distributions(ax, results):
     if reward_data:
         bp = ax.boxplot(reward_data, labels=labels, patch_artist=True, notch=True)
 
-        # Customize box plot colors
         colors = plt.cm.Set2(np.linspace(0, 1, len(bp["boxes"])))
         for patch, color in zip(bp["boxes"], colors):
             patch.set_facecolor(color)
@@ -195,7 +179,6 @@ def _plot_convergence_analysis(ax, training_data):
     if convergence_data:
         convergence_array = np.array(convergence_data)
 
-        # Scatter plot of convergence vs sample efficiency
         colors = plt.cm.viridis(np.linspace(0, 1, len(algorithms)))
 
         for i, (algo, color) in enumerate(zip(algorithms, colors)):
@@ -209,7 +192,6 @@ def _plot_convergence_analysis(ax, training_data):
                 edgecolors="black",
             )
 
-        # Add diagonal line for reference
         max_episodes = max(convergence_array.flatten())
         ax.plot(
             [0, max_episodes],
@@ -228,7 +210,6 @@ def _plot_convergence_analysis(ax, training_data):
 
 def _plot_radar_chart(ax, results):
     """Create radar chart for multi-dimensional performance comparison"""
-    # Select algorithms (exclude BruteForce for cleaner visualization)
     algorithms = [r for r in results if r["algorithm"] != "BruteForce"]
 
     if not algorithms:
@@ -242,7 +223,6 @@ def _plot_radar_chart(ax, results):
         )
         return
 
-    # Define metrics for radar chart
     metrics = [
         "win_rate",
         "efficiency_score",
@@ -256,25 +236,22 @@ def _plot_radar_chart(ax, results):
         "Success\nConsistency",
     ]
 
-    # Number of metrics
     N = len(metrics)
 
-    # Angles for each metric
     angles = [n / float(N) * 2 * np.pi for n in range(N)]
-    angles += angles[:1]  # Complete the circle
+    angles += angles[:1]
 
     colors = plt.cm.Set1(np.linspace(0, 1, len(algorithms)))
 
     for i, (result, color) in enumerate(zip(algorithms, colors)):
         values = [result.get(metric, 0) for metric in metrics]
-        values += values[:1]  # Complete the circle
+        values += values[:1]
 
         ax.plot(
             angles, values, "o-", linewidth=2, label=result["algorithm"], color=color
         )
         ax.fill(angles, values, alpha=0.25, color=color)
 
-    # Add metric labels
     ax.set_xticks(angles[:-1])
     ax.set_xticklabels(metric_labels)
     ax.set_ylim(0, 1)
@@ -308,7 +285,6 @@ def _plot_learning_efficiency(ax, training_data):
             x + width / 2, stability_scores, width, label="Stability Score", alpha=0.8
         )
 
-        # Add value labels
         for bars in [bars1, bars2]:
             for bar in bars:
                 height = bar.get_height()
@@ -342,9 +318,7 @@ def _plot_performance_reliability(ax, results):
         if result["algorithm"] != "BruteForce":
             algorithms.append(result["algorithm"])
             win_streaks.append(result.get("max_win_streak", 0))
-            cv_rewards.append(
-                1 / (1 + result.get("reward_cv", float("inf")))
-            )  # Inverse CV for better is higher
+            cv_rewards.append(1 / (1 + result.get("reward_cv", float("inf"))))
             cv_steps.append(1 / (1 + result.get("step_cv", float("inf"))))
 
     if algorithms:
@@ -355,7 +329,6 @@ def _plot_performance_reliability(ax, results):
         bars2 = ax.bar(x, cv_rewards, width, label="Reward Consistency", alpha=0.8)
         bars3 = ax.bar(x + width, cv_steps, width, label="Step Consistency", alpha=0.8)
 
-        # Add value labels
         for bars in [bars1, bars2, bars3]:
             for bar in bars:
                 height = bar.get_height()
@@ -382,7 +355,6 @@ def _create_advanced_summary_table(ax, results):
     """Create comprehensive summary statistics table"""
     ax.axis("off")
 
-    # Prepare table data
     table_data = []
     headers = [
         "Algorithm",
@@ -407,7 +379,6 @@ def _create_advanced_summary_table(ax, results):
             ]
         )
 
-    # Create table
     table = ax.table(
         cellText=table_data, colLabels=headers, cellLoc="center", loc="center"
     )
@@ -415,12 +386,10 @@ def _create_advanced_summary_table(ax, results):
     table.set_fontsize(10)
     table.scale(1, 2)
 
-    # Style the table
     for i in range(len(headers)):
         table[(0, i)].set_facecolor("#40466e")
         table[(0, i)].set_text_props(weight="bold", color="white")
 
-    # Color code performance
     for i in range(1, len(table_data) + 1):
         if "BruteForce" in table_data[i - 1][0]:
             for j in range(len(headers)):
@@ -440,14 +409,12 @@ def _generate_statistical_report(results, training_data):
     print("COMPREHENSIVE STATISTICAL ANALYSIS REPORT")
     print("=" * 100)
 
-    # Overall performance ranking
     rl_results = [r for r in results if r["algorithm"] != "BruteForce"]
 
     if rl_results:
         print("\n📊 PERFORMANCE RANKINGS")
         print("-" * 50)
 
-        # Rank by different metrics
         rankings = {
             "Win Rate": sorted(rl_results, key=lambda x: x["win_rate"], reverse=True),
             "Efficiency Score": sorted(
@@ -467,19 +434,16 @@ def _generate_statistical_report(results, training_data):
                 score = algo.get(metric.lower().replace(" ", "_"), 0)
                 print(f"  {i}. {algo['algorithm']}: {score:.4f}")
 
-    # Statistical significance testing
     if len(rl_results) > 1:
         print(f"\n🔬 STATISTICAL SIGNIFICANCE TESTING")
         print("-" * 50)
 
-        # Pairwise comparisons for reward distributions
         for i, algo1 in enumerate(rl_results):
             for j, algo2 in enumerate(rl_results[i + 1 :], i + 1):
                 if "reward_distribution" in algo1 and "reward_distribution" in algo2:
                     dist1 = algo1["reward_distribution"]
                     dist2 = algo2["reward_distribution"]
 
-                    # Mann-Whitney U test (non-parametric)
                     statistic, p_value = stats.mannwhitneyu(
                         dist1, dist2, alternative="two-sided"
                     )
@@ -494,7 +458,6 @@ def _generate_statistical_report(results, training_data):
                         f"{algo1['algorithm']} vs {algo2['algorithm']}: p = {p_value:.4f} {significance}"
                     )
 
-    # Performance improvement analysis
     bf_result = next((r for r in results if r["algorithm"] == "BruteForce"), None)
     if bf_result:
         print(f"\n📈 IMPROVEMENT OVER BRUTE FORCE")
@@ -517,7 +480,6 @@ def _generate_statistical_report(results, training_data):
                 f"{result['algorithm']:15} | Reward: {reward_improvement:+7.1f}% | Steps: {step_improvement:+7.1f}% | Efficiency: {efficiency_ratio:.1f}x"
             )
 
-    # Learning characteristics
     print(f"\n🎯 LEARNING CHARACTERISTICS")
     print("-" * 50)
 
@@ -551,21 +513,17 @@ def plot_training_analysis(training_data):
     fig, axes = plt.subplots(3, 2, figsize=(16, 18))
     fig.suptitle("Advanced Training Analysis", fontsize=16, fontweight="bold")
 
-    # 1. Learning curves with trend analysis
     ax = axes[0, 0]
     for algo, data in training_data.items():
         if algo != "BruteForce":
             rewards = data["rewards"]
             episodes = range(len(rewards))
 
-            # Plot raw data with transparency
             ax.plot(episodes, rewards, alpha=0.3, linewidth=0.5)
 
-            # Plot smoothed curve
             smoothed = _smooth_curve(rewards, window=100)
             ax.plot(episodes, smoothed, label=algo, linewidth=2)
 
-            # Add trend line
             if len(rewards) > 50:
                 z = np.polyfit(
                     episodes[-len(rewards) // 2 :], rewards[-len(rewards) // 2 :], 1
@@ -585,7 +543,6 @@ def plot_training_analysis(training_data):
     ax.legend()
     ax.grid(True, alpha=0.3)
 
-    # 2. Exploration vs Exploitation
     ax = axes[0, 1]
     for algo, data in training_data.items():
         if algo != "BruteForce" and "exploration_rates" in data:
@@ -599,7 +556,6 @@ def plot_training_analysis(training_data):
     ax.legend()
     ax.grid(True, alpha=0.3)
 
-    # 3. Q-value change analysis
     ax = axes[1, 0]
     for algo, data in training_data.items():
         if algo != "BruteForce" and "q_value_changes" in data:
@@ -615,7 +571,6 @@ def plot_training_analysis(training_data):
     ax.grid(True, alpha=0.3)
     ax.set_yscale("log")
 
-    # 4. Episode duration analysis
     ax = axes[1, 1]
     for algo, data in training_data.items():
         if algo != "BruteForce" and "episode_times" in data:
@@ -630,12 +585,10 @@ def plot_training_analysis(training_data):
     ax.legend()
     ax.grid(True, alpha=0.3)
 
-    # 5. Success rate progression
     ax = axes[2, 0]
     for algo, data in training_data.items():
         if algo != "BruteForce" and "success_rates" in data:
             success_rates = data["success_rates"]
-            # Calculate rolling success rate
             window = 100
             rolling_success = []
             for i in range(len(success_rates)):
@@ -654,7 +607,6 @@ def plot_training_analysis(training_data):
     ax.grid(True, alpha=0.3)
     ax.set_ylim(0, 1)
 
-    # 6. Performance variance analysis
     ax = axes[2, 1]
     algorithms = []
     reward_vars = []
