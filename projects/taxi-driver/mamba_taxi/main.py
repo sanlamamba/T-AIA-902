@@ -20,7 +20,8 @@ from enhanced_statistics import AdvancedStatisticalAnalyzer
 
 class TaxiDriver:
     def __init__(self):
-        self.env = gym.make("Taxi-v3", render_mode=None)
+        # ["human", "ansi", "rgb_array"]
+        self.env = gym.make("Taxi-v3", render_mode="human")
         self.n_actions = self.env.action_space.n
         self.n_states = self.env.observation_space.n
 

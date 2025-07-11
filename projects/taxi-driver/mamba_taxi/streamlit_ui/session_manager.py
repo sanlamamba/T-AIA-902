@@ -9,7 +9,7 @@ class SessionStateManager:
 
     def initialize_session_state(self):
         if "env" not in st.session_state:
-            st.session_state.env = gym.make("Taxi-v3", render_mode=None)
+            st.session_state.env = gym.make("Taxi-v3", render_mode="human")
             st.session_state.n_actions = st.session_state.env.action_space.n
             st.session_state.n_states = st.session_state.env.observation_space.n
 
