@@ -86,9 +86,15 @@ class TaxiDriver:
 
         if algorithm == "bruteforce":
             print("⚠️  BruteForce doesn't require training")
+            episodes_trained = 0
+            elapsed = 0.0
         else:
-            episodes_trained = self._time_limited_training(agent, algorithm, time_limit)
-            print(f"✅ Trained for {episodes_trained} episodes in {time_limit}s")
+            episodes_trained, elapsed = self._time_limited_training(
+                agent, algorithm, time_limit
+            )
+            print(
+                f"✅ Trained for {episodes_trained} episodes in {elapsed:.2f}s (limit was {time_limit}s)"
+            )
 
         print(f"\n🔍 Starting evaluation...")
         test_result = evaluate_agent(self.env, agent, test_episodes, algo_name)
@@ -101,16 +107,23 @@ class TaxiDriver:
         episode = 0
         rewards = []
 
-        while time.time() - start_time < time_limit:
+        while True:
+            elapsed = time.time() - start_time
+            if elapsed >= time_limit:
+                break
+
             state, _ = self.env.reset()
             done = False
             total_reward = 0
 
-            if algorithm == "sarsa":
-                action = agent.get_action(state)
-
             while not done:
-                if algorithm != "sarsa":
+                if time.time() - start_time >= time_limit:
+                    done = True
+                    break
+
+                if algorithm == "sarsa":
+                    action = agent.get_action(state)
+                else:
                     action = agent.get_action(state, explore=True)
 
                 next_state, reward, done, truncated, _ = self.env.step(action)
@@ -136,7 +149,8 @@ class TaxiDriver:
                 avg_reward = np.mean(rewards[-100:])
                 print(f"Episode {episode}: Avg Reward = {avg_reward:.2f}")
 
-        return episode
+        elapsed = time.time() - start_time
+        return episode, elapsed
 
     def benchmark(self, train_episodes, test_episodes):
         print(f"\n{'='*60}")
@@ -162,7 +176,6 @@ class TaxiDriver:
         ]
 
         for algo_key, agent_class, algo_name in algorithms:
-            print(f"\n🤖 Training {algo_name}...")
             params = self.optimized_params.get(algo_key, {})
             agent = agent_class(self.n_actions, self.n_states, **params)
 
@@ -673,10 +686,13 @@ def main():
     parser.add_argument(
         "--time-limit", type=int, default=60, help="Time limit in seconds"
     )
-    parser.add_argument("--alpha", type=float, default=0.15, help="Learning rate")
-    parser.add_argument("--gamma", type=float, default=0.99, help="Discount factor")
+    parser.add_argument("--alpha", type=float, default=0.23, help="Learning rate")
+    parser.add_argument("--gamma", type=float, default=0.987, help="Discount factor")
     parser.add_argument(
-        "--epsilon", type=float, default=1.0, help="Initial exploration rate"
+        "--epsilon",
+        type=float,
+        default=0.8,
+        help="Initial exploration rate (optimized default)",
     )
     parser.add_argument("--seed", type=int, default=42, help="Random seed")
     parser.add_argument(

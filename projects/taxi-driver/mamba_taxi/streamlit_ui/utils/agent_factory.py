@@ -24,26 +24,33 @@ class AgentFactory:
 
     @staticmethod
     def get_default_params(algorithm):
-        """Get default parameters for an algorithm"""
         if algorithm == "BruteForce":
             return {}
-        elif algorithm in ["Q-Learning", "SARSA"]:
+        elif algorithm == "Q-Learning":
             return {
-                "alpha": 0.15,
-                "gamma": 0.99,
-                "epsilon": 1.0,
-                "epsilon_decay": 0.995,
+                "alpha": 0.23,
+                "gamma": 0.987,
+                "epsilon": 0.8,
+                "epsilon_decay": 0.9945,
+                "epsilon_min": 0.01,
+            }
+        elif algorithm == "SARSA":
+            return {
+                "alpha": 0.19,
+                "gamma": 0.991,
+                "epsilon": 0.7,
+                "epsilon_decay": 0.9952,
                 "epsilon_min": 0.01,
             }
         elif algorithm == "DQN":
             return {
                 "alpha": 0.15,
-                "gamma": 0.99,
-                "epsilon": 1.0,
-                "epsilon_decay": 0.995,
+                "gamma": 0.995,
+                "epsilon": 0.8,
+                "epsilon_decay": 0.9945,
                 "epsilon_min": 0.01,
-                "memory_size": 10000,
-                "batch_size": 32,
+                "memory_size": 15000,
+                "batch_size": 64,
             }
         else:
             return {}

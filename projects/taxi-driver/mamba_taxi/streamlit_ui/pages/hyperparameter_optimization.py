@@ -69,7 +69,7 @@ def render_hyperparameter_optimization_page():
             "Plage du Taux d'Apprentissage",
             0.01,
             0.5,
-            (0.05, 0.3),
+            (0.15, 0.3),
             key="opt_alpha_range",
             help="Plage des taux d'apprentissage à explorer",
         )
@@ -78,7 +78,7 @@ def render_hyperparameter_optimization_page():
             "Plage du Facteur d'Actualisation",
             0.9,
             0.999,
-            (0.95, 0.99),
+            (0.98, 0.999),
             key="opt_gamma_range",
             help="Plage des facteurs d'actualisation à explorer",
         )
@@ -154,9 +154,17 @@ def render_hyperparameter_optimization_page():
 
                     # Configuration comparison with default
                     default_config = {
-                        "alpha": 0.15,
-                        "gamma": 0.99,
-                        "efficiency_score": 0.0,  # Placeholder
+                        "alpha": (
+                            0.23
+                            if algorithm == "Q-Learning"
+                            else (0.19 if algorithm == "SARSA" else 0.15)
+                        ),
+                        "gamma": (
+                            0.987
+                            if algorithm == "Q-Learning"
+                            else (0.991 if algorithm == "SARSA" else 0.995)
+                        ),
+                        "efficiency_score": 0.0,
                     }
 
                     comparison_data = {
@@ -328,7 +336,6 @@ def render_hyperparameter_optimization_page():
             ]
 
             for tip in tips:
-                st.markdown(f"- {tip}")
                 st.markdown(f"- {tip}")
 
 

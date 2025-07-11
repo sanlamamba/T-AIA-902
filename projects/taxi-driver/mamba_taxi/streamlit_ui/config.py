@@ -86,6 +86,6 @@ DEFAULT_PARAMS = {
     "epsilon_min": {"min": 0.001, "max": 0.1, "default": 0.01, "step": 0.001},
     "memory_size": {"min": 1000, "max": 50000, "default": 10000},
     "batch_size": {"min": 16, "max": 128, "default": 32},
-    "train_episodes": {"min": 1, "max": 5000, "default": 1000},
+    "train_episodes": {"min": 1, "max": 100000, "default": 1000},
     "test_episodes": {"min": 1, "max": 1000, "default": 100},
 }
